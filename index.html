@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligence Research Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f7f7f5;
+            color: #2f2f2f;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1000px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #ffffff;
+            border-left: 1px solid #e5e5e2;
+            border-right: 1px solid #e5e5e2;
+        }
+        
+        .header {
+            padding: 24px 32px;
+            border-bottom: 1px solid #e5e5e2;
+            background: #ffffff;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2f2f2f;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #8e8e93;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .search-section {
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 16px 20px;
+            background: #f8f8f8;
+            border: 1px solid #d1d1d6;
+            border-radius: 12px;
+            color: #2f2f2f;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        
+        .search-input:focus {
+            border-color: #cc785c;
+            box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.1);
+        }
+        
+        .search-input::placeholder {
+            color: #8e8e93;
+        }
+        
+        .suggestions {
+            margin-top: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .suggestion-chip {
+            padding: 6px 12px;
+            background: #f0f0f0;
+            border: 1px solid #d1d1d6;
+            border-radius: 20px;
+            color: #666666;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .suggestion-chip:hover {
+            background: #e8e8e8;
+            border-color: #cc785c;
+            color: #2f2f2f;
+        }
+        
+        .search-button {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            padding: 8px 16px;
+            background: #cc785c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .search-button:hover:not(:disabled) {
+            background: #b8694f;
+        }
+        
+        .search-button:disabled {
+            background: #d1d1d6;
+            cursor: not-allowed;
+        }
+        .main-content {
+            flex: 1;
+            padding: 32px 32px 40px;
+            overflow-y: auto;
+        }
+        
+        .status-bar {
+            padding: 16px 0;
+            background: transparent;
+            margin-bottom: 16px;
+        }
+        
+        .status-text {
+            font-size: 14px;
+            color: #8e8e93;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(204, 120, 92, 0.2), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+            border-radius: 4px;
+            padding: 2px 8px;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 2px;
+            background: #e5e5e2;
+            border-radius: 1px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #cc785c;
+            transition: width 0.3s ease;
+            border-radius: 1px;
+        }
+        
+        .results-container {
+            background: #f8f8f8;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #e5e5e2;
+            min-height: 400px;
+        }
+        
+        .thinking-section {
+            background: #ffffff;
+            border-left: 3px solid #cc785c;
+            padding: 20px;
+            margin: 16px 0;
+            border-radius: 8px;
+            border: 1px solid #e5e5e2;
+        }
+        
+        .thinking-title {
+            font-weight: 600;
+            color: #cc785c;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .thinking-content {
+            white-space: pre-wrap;
+            line-height: 1.6;
+            color: #2f2f2f;
+            font-size: 14px;
+        }
+        
+        .update-item {
+            padding: 16px;
+            margin: 12px 0;
+            border-radius: 8px;
+            border-left: 3px solid #d1d1d6;
+            background: #ffffff;
+            font-size: 14px;
+            border: 1px solid #e5e5e2;
+        }
+        
+        .update-item.status {
+            border-left-color: #cc785c;
+            background: rgba(204, 120, 92, 0.03);
+        }
+        
+        .update-item.search {
+            border-left-color: #8e8e93;
+            background: rgba(142, 142, 147, 0.03);
+        }
+        
+        .update-item.error {
+            border-left-color: #d1453b;
+            background: rgba(209, 69, 59, 0.03);
+        }
+        
+        .step-indicator {
+            font-size: 12px;
+            color: #8e8e93;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .final-report {
+            background: rgba(204, 120, 92, 0.05);
+            border: 1px solid #cc785c;
+            padding: 24px;
+            border-radius: 12px;
+            margin-top: 24px;
+        }
+        
+        .final-report h3 {
+            color: #cc785c;
+            margin-bottom: 16px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .final-report pre {
+            color: #2f2f2f;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e5e5e2;
+            border-top: 2px solid #cc785c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #8e8e93;
+            font-size: 14px;
+            margin-top: 80px;
+        }
+        
+        .search-results-grid {
+            display: grid;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .search-result-item {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e5e5e2;
+        }
+        
+        .search-result-title {
+            font-weight: 600;
+            color: #2f2f2f;
+            margin-bottom: 4px;
+        }
+        
+        .search-result-url {
+            font-size: 12px;
+            color: #8e8e93;
+            text-decoration: none;
+        }
+        
+        .search-result-url:hover {
+            color: #cc785c;
+            text-decoration: underline;
+        }
+        
+        .hyperlink {
+            color: #cc785c;
+            text-decoration: none;
+        }
+        
+        .hyperlink:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>Intelligence Research Agent</h1>
+            <p>Advanced AI-powered research and analysis platform</p>
+            
+            <div class="search-section">
+                <input type="text" 
+                       id="searchQuery" 
+                       class="search-input"
+                       placeholder="Enter your research subject or query...">
+                <button onclick="startSearch()" id="searchBtn" class="search-button">Search</button>
+                
+                <div class="suggestions" id="suggestions">
+                    <div class="suggestion-chip" onclick="setQuery('Elon Musk')">Elon Musk</div>
+                    <div class="suggestion-chip" onclick="setQuery('Sam Altman')">Sam Altman</div>
+                    <div class="suggestion-chip" onclick="setQuery('Jensen Huang')">Jensen Huang</div>
+                    <div class="suggestion-chip" onclick="setQuery('Satya Nadella')">Satya Nadella</div>
+                    <div class="suggestion-chip" onclick="setQuery('Marc Benioff')">Marc Benioff</div>
+                    <div class="suggestion-chip" onclick="setQuery('Reid Hoffman')">Reid Hoffman</div>
+                </div>
+                
+                <div class="status-bar" id="statusBar" style="display: none;">
+                    <div class="status-text">
+                        <div class="spinner" id="statusSpinner" style="display: none;"></div>
+                        <span id="statusText">Ready</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="results-container">
+                <div id="results">
+                    <div class="empty-state">
+                        Select a research subject or enter your own query to begin intelligence analysis
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentEventSource = null;
+        let currentStep = null;
+        let updateItems = [];
+        
+        function setQuery(query) {
+            document.getElementById('searchQuery').value = query;
+        }
+        
+        function updateStatus(text, showSpinner = false) {
+            const statusBar = document.getElementById('statusBar');
+            const suggestions = document.getElementById('suggestions');
+            const statusText = document.getElementById('statusText');
+            const statusSpinner = document.getElementById('statusSpinner');
+            
+            // Hide suggestions and show status bar
+            suggestions.style.display = 'none';
+            statusBar.style.display = 'block';
+            statusText.innerHTML = `<span class="shimmer">${text}</span>`;
+            statusSpinner.style.display = showSpinner ? 'block' : 'none';
+        }
+        
+        function hideStatus() {
+            const statusBar = document.getElementById('statusBar');
+            const suggestions = document.getElementById('suggestions');
+            
+            // Show suggestions and hide status bar
+            statusBar.style.display = 'none';
+            suggestions.style.display = 'flex';
+        }
+        
+        function startSearch() {
+            const query = document.getElementById('searchQuery').value.trim();
+            if (!query) {
+                alert('Please enter a research query');
+                return;
+            }
+            
+            // Reset UI
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            updateProgress(0);
+            updateStatus('Initializing research analysis...', true);
+            
+            // Reset tracking variables
+            currentStep = null;
+            updateItems = [];
+            
+            const searchBtn = document.getElementById('searchBtn');
+            searchBtn.disabled = true;
+            searchBtn.textContent = 'Analyzing...';
+            
+            // Close existing connection
+            if (currentEventSource) {
+                currentEventSource.close();
+            }
+            
+            // Start streaming
+            fetch('/api/search/stream', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.body;
+            })
+            .then(body => {
+                const reader = body.getReader();
+                const decoder = new TextDecoder();
+                
+                function readStream() {
+                    reader.read().then(({ done, value }) => {
+                        if (done) {
+                            searchBtn.disabled = false;
+                            searchBtn.textContent = 'Start Deep Search';
+                            return;
+                        }
+                        
+                        const chunk = decoder.decode(value);
+                        const lines = chunk.split('\n');
+                        
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                try {
+                                    const data = JSON.parse(line.slice(6));
+                                    handleStreamData(data);
+                                } catch (e) {
+                                    console.error('Error parsing JSON:', e);
+                                }
+                            }
+                        }
+                        
+                        readStream();
+                    });
+                }
+                
+                readStream();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addUpdate('error', `Error: ${error.message}`);
+                searchBtn.disabled = false;
+                searchBtn.textContent = 'Search';
+                hideStatus();
+            });
+        }
+        
+        function handleStreamData(data) {
+            console.log('Received:', data);
+            
+            if (data.progress) {
+                updateProgress(data.progress);
+            }
+            
+            switch (data.type) {
+                case 'thinking_start':
+                    updateStatus('AI is analyzing your query...', true);
+                    addThinkingSection();
+                    addUpdate('status', data.message);
+                    break;
+                    
+                case 'thinking_update':
+                    updateThinkingContent(data.content);
+                    break;
+                    
+                case 'thinking_complete':
+                    updateStatus('Analysis complete, starting research...', true);
+                    completeThinkingSection();
+                    addUpdate('status', data.message);
+                    break;
+                    
+                case 'status':
+                    updateStatus(data.message, true);
+                    addUpdate('status', data.message);
+                    break;
+                    
+                case 'progress':
+                    updateStatus(data.description, true);
+                    currentStep = data.step;
+                    
+                    addUpdate('status', 
+                        `<div class="step-indicator">${data.step}</div>
+                         ${data.description}<br>
+                         <small>Results: ${data.results_count || 0} | Facts: ${data.facts_count || 0} | Risks: ${data.risks_count || 0}</small>`
+                    );
+                    break;
+                    
+                case 'search_update':
+                    updateStatus('Processing search results...', true);
+                    addUpdate('search', data.message);
+                    if (data.search_results && data.search_results.length > 0) {
+                        addSearchResults(data.search_results);
+                    }
+                    break;
+                    
+                case 'extraction_update':
+                    updateStatus('Extracting key information...', true);
+                    addUpdate('status', data.message);
+                    break;
+                    
+                case 'risk_analysis_update':
+                    updateStatus('Analyzing potential risks...', true);
+                    addUpdate('status', data.message);
+                    break;
+                    
+                case 'connection_update':
+                    updateStatus('Mapping entity connections...', true);
+                    addUpdate('status', data.message);
+                    break;
+                    
+                case 'validation_update':
+                    updateStatus('Validating information sources...', true);
+                    addUpdate('status', data.message);
+                    break;
+                    
+                case 'planning_update':
+                    updateStatus('Planning next research steps...', true);
+                    addUpdate('status', data.message);
+                    break;
+                    
+                case 'report_ready':
+                    updateStatus('Research complete', false);
+                    addFinalReport(data.report);
+                    break;
+                    
+                case 'completion':
+                    updateStatus('Research analysis completed', false);
+                    addUpdate('status', data.message);
+                    updateProgress(100);
+                    setTimeout(() => {
+                        const searchBtn = document.getElementById('searchBtn');
+                        searchBtn.disabled = false;
+                        searchBtn.textContent = 'Search';
+                        hideStatus();
+                    }, 2000);
+                    break;
+                    
+                case 'error':
+                    updateStatus('Error occurred', false);
+                    addUpdate('error', data.message);
+                    const searchBtn = document.getElementById('searchBtn');
+                    searchBtn.disabled = false;
+                    searchBtn.textContent = 'Search';
+                    setTimeout(hideStatus, 2000);
+                    break;
+            }
+        }
+        
+        let thinkingSection = null;
+        let thinkingContent = null;
+        
+        function addThinkingSection() {
+            const resultsDiv = document.getElementById('results');
+            thinkingSection = document.createElement('div');
+            thinkingSection.className = 'thinking-section';
+            thinkingSection.innerHTML = `
+                <div class="thinking-title">
+                    <div class="spinner"></div>
+                    AI Analysis in Progress
+                </div>
+                <div class="thinking-content"></div>
+            `;
+            resultsDiv.appendChild(thinkingSection);
+            thinkingContent = thinkingSection.querySelector('.thinking-content');
+        }
+        
+        function updateThinkingContent(content) {
+            if (thinkingContent) {
+                thinkingContent.textContent += content;
+                thinkingContent.scrollTop = thinkingContent.scrollHeight;
+            }
+        }
+        
+        function completeThinkingSection() {
+            if (thinkingSection) {
+                const titleDiv = thinkingSection.querySelector('.thinking-title');
+                titleDiv.innerHTML = 'Strategic Analysis Complete';
+            }
+        }
+        
+        function addUpdate(type, message) {
+            const resultsDiv = document.getElementById('results');
+            const updateDiv = document.createElement('div');
+            updateDiv.className = `update-item ${type}`;
+            updateDiv.innerHTML = convertLinksToHyperlinks(message);
+            
+            resultsDiv.appendChild(updateDiv);
+            updateItems.push(updateDiv);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        function convertLinksToHyperlinks(text) {
+            // Convert URLs to clickable hyperlinks
+            const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`[\]]+)/g;
+            return text.replace(urlRegex, '<a href="$1" class="hyperlink" target="_blank">$1</a>');
+        }
+        
+        function addSearchResults(results) {
+            const resultsDiv = document.getElementById('results');
+            const searchDiv = document.createElement('div');
+            searchDiv.className = 'search-results-grid';
+            
+            const resultsHtml = results.map(result => 
+                `<div class="search-result-item">
+                    <div class="search-result-title">${result.title}</div>
+                    <a href="${result.url}" class="search-result-url" target="_blank">${result.url}</a>
+                </div>`
+            ).join('');
+            
+            searchDiv.innerHTML = resultsHtml;
+            resultsDiv.appendChild(searchDiv);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        function addFinalReport(report) {
+            const resultsDiv = document.getElementById('results');
+            const reportDiv = document.createElement('div');
+            reportDiv.className = 'final-report';
+            reportDiv.innerHTML = `<h3>Intelligence Report</h3>${report}`;
+            resultsDiv.appendChild(reportDiv);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        function updateProgress(percent) {
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = percent + '%';
+        }
+        
+        // Allow Enter key to trigger search
+        document.getElementById('searchQuery').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                startSearch();
+            }
+        });
+        
+        // Auto-focus search input
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('searchQuery').focus();
+        });
+    </script>
+</body>
+</html>
