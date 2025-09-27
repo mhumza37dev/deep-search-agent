@@ -2,11 +2,11 @@
 
 An autonomous research agent built with LangGraph for comprehensive investigations, featuring multi-step analysis, risk assessment, and connection mapping capabilities.
 
-## 🚀 Overview
+## Overview
 
 The Deep Search Agent is a sophisticated AI-powered research tool that performs comprehensive investigations on topics or entities. It uses LangGraph to orchestrate multiple analysis stages including fact extraction, risk assessment, connection mapping, and source validation.
 
-## 📋 Prerequisites
+## Prerequisites
 
 - **Python**: 3.10.4 or higher
 - **UV Package Manager**: For dependency management
@@ -87,7 +87,7 @@ The application will be available at:
 - **API Documentation**: http://localhost:1122/docs
 - **Health Check**: http://localhost:1122/
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 deep_search_agent_assessment/
@@ -191,7 +191,7 @@ deep_search_agent_assessment/
 
 - **`src/evaluators/evaluation.py`**: Comprehensive testing framework with predefined test cases for prominent figures (Elon Musk, Jensen Huang, Sam Altman)
 
-## 🔧 Usage
+## Usage
 
 ### Web Interface
 
@@ -231,7 +231,7 @@ for test_case in test_cases:
     print(f"Score for {test_case['name']}: {evaluation['overall_score']:.1%}")
 ```
 
-## 🧪 Testing
+## Testing
 
 The project includes a comprehensive evaluation framework located in `src/evaluators/evaluation.py`. It tests the agent's ability to:
 
@@ -247,25 +247,5 @@ The evaluation includes predefined test cases for:
 - **Jensen Huang**: NVIDIA CEO with semiconductor industry connections
 - **Sam Altman**: OpenAI CEO with venture capital and startup connections
 
-## 🚨 Important Notes
-
-- **API Keys**: Ensure all required API keys are properly configured in the `.env` file
-- **Rate Limits**: Be mindful of API rate limits for Azure OpenAI and Tavily
-- **Costs**: Monitor usage as LLM API calls can incur significant costs
-- **Compliance**: Ensure research activities comply with applicable laws and regulations
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is part of an assessment and is intended for evaluation purposes.
-
----
 
 **Built with**: Python 3.10+, LangGraph, FastAPI, Azure OpenAI, Tavily API
