@@ -6,6 +6,7 @@ from src.agent.services.analysis_service import AnalysisService
 from src.agent.graph.state import ResearchState, initialize_research_state
 from src.agent.graph.nodes.search_node import SearchNode
 from src.agent.graph.nodes.extraction_node import ExtractionNode
+from src.agent.graph.nodes.relevance_evaluation_node import RelevanceEvaluationNode
 from src.agent.graph.nodes.risk_analysis_node import RiskAnalysisNode
 from src.agent.graph.nodes.connection_mapping_node import ConnectionMappingNode
 from src.agent.graph.nodes.validation_node import ValidationNode
@@ -27,6 +28,7 @@ class ResearchGraphBuilder:
         """Initialize all workflow nodes"""
         self.search_node = SearchNode(self.search_service)
         self.extraction_node = ExtractionNode(self.model_service)
+        self.relevance_evaluation_node = RelevanceEvaluationNode(self.model_service)
         self.risk_analysis_node = RiskAnalysisNode(self.model_service)
         self.connection_mapping_node = ConnectionMappingNode(self.model_service)
         self.validation_node = ValidationNode(self.model_service)
@@ -46,6 +48,7 @@ class ResearchGraphBuilder:
         """Add all nodes to the workflow"""
         workflow.add_node("search", self.search_node.execute)
         workflow.add_node("extract", self.extraction_node.execute)
+        workflow.add_node("evaluate_relevance", self.relevance_evaluation_node.execute)
         workflow.add_node("analyze_risks", self.risk_analysis_node.execute)
         workflow.add_node("map_connections", self.connection_mapping_node.execute)
         workflow.add_node("validate", self.validation_node.execute)
@@ -56,9 +59,18 @@ class ResearchGraphBuilder:
         """Configure workflow edges and routing"""
         workflow.set_entry_point("search")
 
-        # Linear flow through analysis nodes
+        # Flow from search through extraction to relevance evaluation
         workflow.add_edge("search", "extract")
-        workflow.add_edge("extract", "analyze_risks")
+        workflow.add_edge("extract", "evaluate_relevance")
+        
+        # Conditional routing from relevance evaluation
+        workflow.add_conditional_edges(
+            "evaluate_relevance",
+            ConditionalRouter.should_enhance_search,
+            {"search": "search", "continue": "analyze_risks"},
+        )
+
+        # Linear flow through remaining analysis nodes
         workflow.add_edge("analyze_risks", "map_connections")
         workflow.add_edge("map_connections", "validate")
         workflow.add_edge("validate", "plan_next")

@@ -93,10 +93,7 @@ The application will be available at:
 deep_search_agent_assessment/
 ├── main.py                     # FastAPI application entry point
 ├── pyproject.toml             # Project dependencies and metadata
-├── uv.lock                    # Dependency lock file
 ├── index.html                 # Web interface frontend
-├── research_graph.png         # LangGraph workflow visualization
-├── .env                       # Environment variables (create this)
 ├── .gitignore                 # Git ignore patterns
 │
 ├── src/                       # Source code directory
@@ -134,9 +131,6 @@ deep_search_agent_assessment/
 │   │   │   └── search_controller.py    # Search endpoint controllers
 │   │   └── manager/
 │   │       └── search_manager.py       # Search orchestration logic
-│   │
-│   └── evaluators/           # Testing and evaluation
-│       └── evaluation.py     # Evaluation framework with test cases
 ```
 
 ### Component Responsibilities
@@ -187,10 +181,6 @@ deep_search_agent_assessment/
 - **`src/api/controller/search_controller.py`**: REST endpoints for search operations
 - **`src/api/manager/search_manager.py`**: High-level search orchestration and streaming
 
-#### Evaluation Framework
-
-- **`src/evaluators/evaluation.py`**: Comprehensive testing framework with predefined test cases for prominent figures (Elon Musk, Jensen Huang, Sam Altman)
-
 ## Usage
 
 ### Web Interface
@@ -216,36 +206,12 @@ for chunk in response.iter_content(chunk_size=1024):
     print(chunk.decode())
 ```
 
-### Running Evaluations
-
-```python
-from src.evaluators.evaluation import create_test_cases, evaluate_investigation
-
-# Load test cases
-test_cases = create_test_cases()
-
-# Run evaluation (implement your investigation logic)
-for test_case in test_cases:
-    results = your_investigation_function(test_case["name"])
-    evaluation = evaluate_investigation(results, test_case)
-    print(f"Score for {test_case['name']}: {evaluation['overall_score']:.1%}")
-```
-
 ## Testing
-
-The project includes a comprehensive evaluation framework located in `src/evaluators/evaluation.py`. It tests the agent's ability to:
 
 - **Fact Discovery**: Uncover hidden biographical and business facts
 - **Risk Identification**: Detect potential legal, financial, and reputational risks  
 - **Connection Mapping**: Map relationships between people, organizations, and events
 - **Source Validation**: Verify information credibility
-
-### Test Subjects
-
-The evaluation includes predefined test cases for:
-- **Elon Musk**: Tech entrepreneur with complex business network
-- **Jensen Huang**: NVIDIA CEO with semiconductor industry connections
-- **Sam Altman**: OpenAI CEO with venture capital and startup connections
 
 
 **Built with**: Python 3.10+, LangGraph, FastAPI, Azure OpenAI, Tavily API

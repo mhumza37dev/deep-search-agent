@@ -86,7 +86,10 @@ class ModelService:
                 response = self.gpt4.invoke([{"role": "user", "content": full_prompt}])
             else:
                 response = self.grok.invoke([{"role": "user", "content": full_prompt}])
-            result = response
+            if "```json" in response:
+                result = response.split("```json")[1].split("```")[0].strip()
+            else:
+                result = response
 
             # Try to parse JSON response
             try:

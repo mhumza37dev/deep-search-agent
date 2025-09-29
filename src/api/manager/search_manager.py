@@ -99,12 +99,13 @@ class SearchManager:
         """Execute the research graph with streaming updates"""
         current_state = initial_state
         step_count = 0
-        max_steps = 10  # Prevent infinite loops
+        max_steps = 15  # Prevent infinite loops - increased to accommodate relevance evaluation
 
         # Map node names to user-friendly descriptions
         node_descriptions = {
             "search": "Searching for information",
             "extract": "Extracting key facts",
+            "evaluate_relevance": "Evaluating search relevance",
             "analyze_risks": "Analyzing potential risks",
             "map_connections": "Mapping entity connections",
             "validate": "Validating information sources",
@@ -171,6 +172,18 @@ class SearchManager:
                         "confidence_scores": current_state.get("confidence_scores", {}),
                     }
 
+                elif node_name == "evaluate_relevance":
+                    relevance_scores = current_state.get("relevance_scores", [])
+                    latest_score = relevance_scores[-1] if relevance_scores else {}
+                    needs_enhancement = current_state.get("needs_enhanced_search", False)
+                    
+                    yield {
+                        "type": "relevance_update",
+                        "message": f"Relevance evaluation: {latest_score.get('overall_score', 0):.2f} - {'Enhancing search' if needs_enhancement else 'Proceeding with analysis'}",
+                        "relevance_score": latest_score.get('overall_score', 0),
+                        "needs_enhancement": needs_enhancement,
+                    }
+
                 elif node_name == "analyze_risks":
                     yield {
                         "type": "risk_analysis_update",
@@ -208,10 +221,11 @@ class SearchManager:
                         }
 
                 elif node_name == "generate_report":
+                    report_content = current_state.get("report", "")
                     yield {
                         "type": "report_ready",
                         "message": "Final report generated",
-                        "report": current_state.get("report", ""),
+                        "report": report_content,
                         "progress": 100,
                     }
 

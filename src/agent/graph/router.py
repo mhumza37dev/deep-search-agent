@@ -15,3 +15,15 @@ class ConditionalRouter:
         else:
             print("Moving to report generation")
             return "report"
+
+    @staticmethod
+    def should_enhance_search(state: ResearchState) -> str:
+        """Determine if search needs enhancement based on relevance evaluation"""
+        needs_enhancement = state.get("needs_enhanced_search", False)
+        
+        if needs_enhancement:
+            print("Search results not relevant enough, enhancing search")
+            return "search"
+        else:
+            print("Search results are relevant, continuing to analysis")
+            return "continue"

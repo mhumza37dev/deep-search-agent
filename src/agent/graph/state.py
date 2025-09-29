@@ -11,6 +11,9 @@ class ResearchState(TypedDict):
     next_queries: List[str]
     iteration: int
     report: str
+    relevance_scores: List[Dict[str, Any]]
+    needs_enhanced_search: bool
+    relevance_attempts: int
 
 
 def initialize_research_state(target: str) -> ResearchState:
@@ -25,4 +28,7 @@ def initialize_research_state(target: str) -> ResearchState:
         next_queries=[],
         iteration=0,
         report="",
+        relevance_scores=[],
+        needs_enhanced_search=False,
+        relevance_attempts=0,
     )

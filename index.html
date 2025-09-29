@@ -335,12 +335,9 @@
                 <button onclick="startSearch()" id="searchBtn" class="search-button">Search</button>
                 
                 <div class="suggestions" id="suggestions">
-                    <div class="suggestion-chip" onclick="setQuery('Elon Musk')">Elon Musk</div>
-                    <div class="suggestion-chip" onclick="setQuery('Sam Altman')">Sam Altman</div>
-                    <div class="suggestion-chip" onclick="setQuery('Jensen Huang')">Jensen Huang</div>
-                    <div class="suggestion-chip" onclick="setQuery('Satya Nadella')">Satya Nadella</div>
-                    <div class="suggestion-chip" onclick="setQuery('Marc Benioff')">Marc Benioff</div>
-                    <div class="suggestion-chip" onclick="setQuery('Reid Hoffman')">Reid Hoffman</div>
+                    <div class="suggestion-chip" onclick="setQuery('Ali Muzaffar')">Ali Muzaffar</div>
+                    <div class="suggestion-chip" onclick="setQuery('Adam Love')">Adam Love</div>
+                    <div class="suggestion-chip" onclick="setQuery('Adil Mohammad')">Adil Mohammad</div>
                 </div>
                 
                 <div class="status-bar" id="statusBar" style="display: none;">
@@ -372,6 +369,13 @@
         let updateItems = [];
         
         function setQuery(query) {
+            if(query === "Ali Muzaffar") {
+                query = "Ali Muzaffar - Director Of Engineering at Bykea";
+            } else if (query === "Adam Love") {
+                query = "Adam Love - Head of Product & Engineering at sortd";
+            } else if (query === "Adil Mohammad") {
+                query = "Adil Mohammad - Deputy Chief Executive Officer at MBK Global";
+            }
             document.getElementById('searchQuery').value = query;
         }
         
@@ -553,6 +557,8 @@
                     
                 case 'report_ready':
                     updateStatus('Research complete', false);
+                    console.log('DEBUG: Report received, length:', data.report ? data.report.length : 0);
+                    console.log('DEBUG: Report preview:', data.report ? data.report.substring(0, 100) : 'NO REPORT');
                     addFinalReport(data.report);
                     break;
                     
@@ -593,7 +599,12 @@
                 </div>
                 <div class="thinking-content"></div>
             `;
-            resultsDiv.appendChild(thinkingSection);
+            // Insert thinking section at the top
+            if (resultsDiv.firstChild) {
+                resultsDiv.insertBefore(thinkingSection, resultsDiv.firstChild);
+            } else {
+                resultsDiv.appendChild(thinkingSection);
+            }
             thinkingContent = thinkingSection.querySelector('.thinking-content');
         }
         
@@ -617,9 +628,14 @@
             updateDiv.className = `update-item ${type}`;
             updateDiv.innerHTML = convertLinksToHyperlinks(message);
             
-            resultsDiv.appendChild(updateDiv);
-            updateItems.push(updateDiv);
-            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+            // Insert at the beginning to show newest items on top
+            if (resultsDiv.firstChild) {
+                resultsDiv.insertBefore(updateDiv, resultsDiv.firstChild);
+            } else {
+                resultsDiv.appendChild(updateDiv);
+            }
+            updateItems.unshift(updateDiv); // Add to beginning of array too
+            // Don't auto-scroll to bottom since we want to show newest items at top
         }
         
         function convertLinksToHyperlinks(text) {
@@ -641,17 +657,38 @@
             ).join('');
             
             searchDiv.innerHTML = resultsHtml;
-            resultsDiv.appendChild(searchDiv);
-            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+            // Insert search results after thinking section but before other updates
+            if (thinkingSection && thinkingSection.nextSibling) {
+                resultsDiv.insertBefore(searchDiv, thinkingSection.nextSibling);
+            } else if (resultsDiv.firstChild) {
+                resultsDiv.insertBefore(searchDiv, resultsDiv.firstChild);
+            } else {
+                resultsDiv.appendChild(searchDiv);
+            }
         }
         
         function addFinalReport(report) {
+            console.log('DEBUG: addFinalReport called with report length:', report ? report.length : 0);
             const resultsDiv = document.getElementById('results');
             const reportDiv = document.createElement('div');
             reportDiv.className = 'final-report';
-            reportDiv.innerHTML = `<h3>Intelligence Report</h3>${report}`;
-            resultsDiv.appendChild(reportDiv);
-            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+            
+            if (!report || report.trim() === '') {
+                console.log('DEBUG: Empty report received');
+                reportDiv.innerHTML = `<h3>Intelligence Report</h3><p>Report generation completed but content is empty.</p>`;
+            } else {
+                reportDiv.innerHTML = `<h3>Intelligence Report</h3>${report}`;
+            }
+            
+            // Insert final report at the top (most important content)
+            if (resultsDiv.firstChild) {
+                resultsDiv.insertBefore(reportDiv, resultsDiv.firstChild);
+            } else {
+                resultsDiv.appendChild(reportDiv);
+            }
+            // Scroll to top to show the final report
+            resultsDiv.scrollTop = 0;
+            console.log('DEBUG: Final report added to DOM');
         }
         
         function updateProgress(percent) {
